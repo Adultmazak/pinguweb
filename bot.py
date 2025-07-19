@@ -19,9 +19,9 @@ def auto_ping():
                 print(f"[x] Error visiting {url}: {e}")
         time.sleep(120)
 
-api_id = 123456       # <-- yahan apna API_ID daalo
-api_hash = "your_api_hash"  # <-- yahan apna API_HASH daalo
-bot_token = "your_bot_token"  # <-- yahan apna BOT_TOKEN daalo
+api_id = 8249601      # <-- yahan apna API_ID daalo
+api_hash = "33441ed906e6cf20c47c4c12f67c48cb"  # <-- yahan apna API_HASH daalo
+bot_token = "7917551868:AAGWHmmK8sRaVlPKL03-iYM2hkOnEVoALxc"  # <-- yahan apna BOT_TOKEN daalo
 
 app = Client("bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
