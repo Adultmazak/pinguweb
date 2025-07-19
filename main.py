@@ -1,53 +1,45 @@
-import json, time, threading
-import requests
 from pyrogram import Client, filters
+import asyncio
+from keep_alive import visit_websites
 
 API_ID = 8249601
 API_HASH = "33441ed906e6cf20c47c4c12f67c48cb"
 BOT_TOKEN = "7917551868:AAGWHmmK8sRaVlPKL03-iYM2hkOnEVoALxc"
 
-app = Client("keepalive_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-WEBSITE_FILE = "websites.json"
+@app.on_message(filters.command("start"))
+async def start(client, message):
+    await message.reply("🤖 Bot Activated!\n\nHar 2 min me websites ko visit karega.")
 
-def load_links():
-    try:
-        with open(WEBSITE_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return []
-
-def save_links(links):
-    with open(WEBSITE_FILE, "w") as f:
-        json.dump(links, f)
-
-@app.on_message(filters.private & filters.text)
-def save_link(client, message):
-    link = message.text.strip()
-    if link.startswith("http"):
-        links = load_links()
-        if link not in links:
-            links.append(link)
-            save_links(links)
-            message.reply_text(f"✅ Link saved: {link}")
-        else:
-            message.reply_text("⚠️ Link already exists.")
+@app.on_message(filters.text)
+async def add_website(client, message):
+    url = message.text.strip()
+    if url.startswith("http://") or url.startswith("https://"):
+        with open("websites.txt", "a") as f:
+            f.write(url + "\n")
+        await message.reply(f"✅ Website Added:\n{url}")
     else:
-        message.reply_text("❌ Invalid URL.")
+        await message.reply("❌ Invalid URL. Please send a valid link.")
 
-def keep_alive():
+async def auto_visit():
     while True:
-        links = load_links()
-        for link in links:
-            try:
-                requests.get(link, timeout=10)
-                print(f"[✓] Visited: {link}")
-            except Exception as e:
-                print(f"[✗] Failed: {link} — {e}")
-        time.sleep(120)
+        await visit_websites()
+        await asyncio.sleep(120)  # Every 2 minutes
 
-# Start background thread
-threading.Thread(target=keep_alive, daemon=True).start()
+@app.on_message(filters.command("show"))
+async def show_websites(client, message):
+    try:
+        with open("websites.txt", "r") as f:
+            sites = f.read()
+        await message.reply(f"📄 Websites:\n{sites}")
+    except:
+        await message.reply("No websites added yet.")
 
-# Start bot
-app.run()
+async def main():
+    await app.start()
+    await auto_visit()
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
